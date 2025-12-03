@@ -21,9 +21,6 @@ jobs:
       with:
         go-version: '1.25.4'
 
-    - name: Set up build-essentials
-      run: apt update && apt install build-essentials
-
     - name: Build with Makefile
       run: make build
 
