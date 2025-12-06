@@ -14,6 +14,7 @@ import (
 	"github.com/guilherme-or/go-api-template/internal/domain/user"
 	"github.com/guilherme-or/go-api-template/internal/store"
 	"github.com/guilherme-or/go-api-template/internal/store/database"
+	"github.com/guilherme-or/go-api-template/internal/store/models"
 )
 
 func main() {
@@ -52,8 +53,13 @@ func wire() *api.Server {
 		profile.Use(api.JWTMiddleware)
 		profile.Get("/", handler.ProfileHandler(userService))
 
+		greeting := chi.NewRouter()
+		greeting.Use(api.JWTMiddleware, api.RoleMiddleware(models.RoleAdmin))
+		greeting.Get("/", handler.GreetingHandler(userService))
+
 		m.Mount("/auth", auth)
 		m.Mount("/profile", profile)
+		m.Mount("/greeting", greeting)
 	})
 
 	// server

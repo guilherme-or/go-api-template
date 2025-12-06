@@ -95,7 +95,7 @@ func (s *AuthService) AuthenticateWithPassword(email, password string) (*Authent
 		return nil, ErrInvalidUserOrPassword
 	}
 
-	token, claims, err := GenerateJWTToken(user.ID)
+	token, claims, err := GenerateJWTToken(user)
 	if err != nil {
 		slog.Error(ErrTokenGeneration.Error(), "email", email, "error", err, "token", token)
 		return nil, ErrTokenGeneration

@@ -14,9 +14,10 @@ var (
 	ContentTypeHeader = "Content-Type"
 	JSONContentType   = mime.TypeByExtension(".json")
 
-	ErrNotJSONContentType = errors.New("unsupported Content-Type header, expected application/json")
-	ErrMissingBearerToken = errors.New("missing bearer token in Authorization header")
-	ErrInvalidBearerToken = errors.New("invalid or expired bearer token")
+	ErrNotJSONContentType      = errors.New("unsupported Content-Type header, expected application/json")
+	ErrMissingBearerToken      = errors.New("missing bearer token in Authorization header")
+	ErrInvalidBearerToken      = errors.New("invalid or expired bearer token")
+	ErrInsufficientPermissions = errors.New("user has insufficient permissions to access this resource")
 )
 
 // Ensures that client and server communicate using JSON via Content-Type header
@@ -68,4 +69,27 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func RoleMiddleware(allowedRoles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			claims, ok := r.Context().Value(auth.ClaimsContextKey).(*auth.Claims)
+			if !ok || claims == nil {
+				RespondJSONErr(w, http.StatusUnauthorized, ErrInvalidBearerToken)
+				return
+			}
+
+			for _, userRole := range claims.Roles {
+				for _, allowedRole := range allowedRoles {
+					if userRole == allowedRole {
+						next.ServeHTTP(w, r)
+						return
+					}
+				}
+			}
+
+			RespondJSONErr(w, http.StatusForbidden, ErrInsufficientPermissions)
+		})
+	}
 }

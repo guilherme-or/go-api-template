@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/guilherme-or/go-api-template/config/env"
+	"github.com/guilherme-or/go-api-template/internal/store/models"
 )
 
 type (
@@ -15,6 +16,7 @@ type (
 	// Custom JWT claims structure
 	Claims struct {
 		UserID uuid.UUID `json:"user_id"`
+		Roles  []string  `json:"roles"`
 		jwt.RegisteredClaims
 	}
 )
@@ -28,10 +30,11 @@ const (
 )
 
 // Creates a JWT token for the given user ID
-func GenerateJWTToken(ID uuid.UUID) (string, *Claims, error) {
+func GenerateJWTToken(user *models.User) (string, *Claims, error) {
 	now := time.Now()
 	claims := Claims{
-		UserID: ID,
+		UserID: user.ID,
+		Roles:  user.Roles(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(tokenDuration)),

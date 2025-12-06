@@ -2,7 +2,6 @@ package database
 
 import (
 	"log/slog"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/guilherme-or/go-api-template/internal/store/models"
@@ -33,15 +32,24 @@ func NewGORMPostgresConnection(dsn string, debug bool) (*gorm.DB, error) {
 		return db, err
 	}
 
-	now := time.Now()
 	db.Create(&models.User{
 		Default: models.Default{
 			ID: uuid.New(),
 		},
-		Email:       "guioliroc@gmail.com",
-		Name:        "Guilherme Rocha",
-		Password:    "$2a$12$ASolmc9y3MtypLAlQ.wAOeXBiW5BYYXtsDGFNTExN6Cw8PKhldNyO", // G29aj~@#
-		ConfirmedAt: &now,
+		Email:    "guioliroc@gmail.com",
+		Name:     "Guilherme Rocha",
+		Password: "$2a$12$ASolmc9y3MtypLAlQ.wAOeXBiW5BYYXtsDGFNTExN6Cw8PKhldNyO", // G29aj~@#
+		Role:     models.RoleAdmin,
+	})
+
+	db.Create(&models.User{
+		Default: models.Default{
+			ID: uuid.New(),
+		},
+		Email:    "tester@hotmail.com",
+		Name:     "Tester McTestface",
+		Password: "$2a$12$ASolmc9y3MtypLAlQ.wAOeXBiW5BYYXtsDGFNTExN6Cw8PKhldNyO", // G29aj~@#
+		Role:     models.RoleUser,
 	})
 
 	return db, nil

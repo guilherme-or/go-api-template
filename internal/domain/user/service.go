@@ -12,18 +12,22 @@ var (
 	ErrUserProfile = errors.New("unable to retrieve user profile")
 )
 
-type UserService struct {
+type UserService interface {
+	GetUserProfile(ID uuid.UUID) (*ProfileDTO, error)
+}
+
+type userServiceImpl struct {
 	store store.UserStore
 }
 
-func NewUserService(store store.UserStore) *UserService {
-	return &UserService{store: store}
+func NewUserService(store store.UserStore) UserService {
+	return &userServiceImpl{store: store}
 }
 
-func (s *UserService) GetUserProfile(ID uuid.UUID) (*ProfileDTO, error) {
-	profile, err := s.store.GetUserProfile(ID)
+func (s *userServiceImpl) GetUserProfile(ID uuid.UUID) (*ProfileDTO, error) {
+	profile, err := s.store.GetUserByID(ID)
 	if err != nil {
-		slog.Error("Unable to retrieve user profile for UUID "+ID.String(), "error", err, "uuid", ID)
+		slog.Error("Unable to retrieve user", "error", err, "uuid", ID)
 		return nil, ErrUserProfile
 	}
 

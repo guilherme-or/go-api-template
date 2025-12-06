@@ -7,7 +7,7 @@ import (
 	"github.com/guilherme-or/go-api-template/internal/domain/user"
 )
 
-func ProfileHandler(userService *user.UserService) http.HandlerFunc {
+func ProfileHandler(userService user.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		claims, _ := api.GetClaims(r)
 
@@ -18,5 +18,23 @@ func ProfileHandler(userService *user.UserService) http.HandlerFunc {
 		}
 
 		api.RespondJSON(w, http.StatusOK, profile)
+	}
+}
+
+func GreetingHandler(userService user.UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims, _ := api.GetClaims(r)
+
+		profile, err := userService.GetUserProfile(claims.UserID)
+		if err != nil {
+			api.RespondJSONErr(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		greeting := map[string]string{
+			"message": "Hello, " + profile.Name + "!",
+		}
+
+		api.RespondJSON(w, http.StatusOK, greeting)
 	}
 }

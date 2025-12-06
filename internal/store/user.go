@@ -8,7 +8,6 @@ import (
 
 type UserStore interface {
 	GetUserByID(id uuid.UUID) (*models.User, error)
-	GetUserProfile(id uuid.UUID) (*models.UserProfile, error)
 }
 
 type gormUserStore struct {
@@ -28,15 +27,4 @@ func (s *gormUserStore) GetUserByID(id uuid.UUID) (*models.User, error) {
 	}
 
 	return &user, nil
-}
-
-func (s *gormUserStore) GetUserProfile(id uuid.UUID) (*models.UserProfile, error) {
-	var profile models.UserProfile
-
-	result := s.db.Model(&models.User{}).Select("id", "name", "email", "phone").Where("id = ?", id).First(&profile)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return &profile, nil
 }
